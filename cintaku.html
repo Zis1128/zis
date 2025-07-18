@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Quest - Permainan Cinta Berhadiah 💕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating hearts */
+        .heart {
+            position: absolute;
+            color: rgba(255, 192, 203, 0.7);
+            font-size: 20px;
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Main container */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Game container */
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff4757, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .prize-banner {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #333;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.3em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+            animation: glow 3s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4); }
+            50% { box-shadow: 0 5px 25px rgba(255, 215, 0, 0.8); }
+        }
+
+        /* Progress bar */
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 25px;
+            padding: 3px;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            background: linear-gradient(45deg, #ff4757, #ff6b35);
+            height: 20px;
+            border-radius: 25px;
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        /* Game stages */
+        .game-stage {
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .game-stage.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .stage-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .stage-description {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* Question styles */
+        .question-container {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .question {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px;
+            border: 2px solid #ff4757;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .option:hover {
+            background: #ff4757;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .option.correct {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+
+        .option.wrong {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        /* Input styles */
+        .input-container {
+            margin: 20px 0;
+        }
+
+        .love-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ff4757;
+            border-radius: 10px;
+            font-size: 1.1em;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .love-input:focus {
+            border-color: #ff6b35;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff4757, #ff6b35);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .btn-help {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            color: white;
+            font-size: 1em;
+            padding: 10px 20px;
+        }
+
+        .help-system {
+            background: rgba(155, 89, 182, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .help-counter {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #9b59b6;
+            margin-bottom: 10px;
+        }
+
+        .help-message {
+            background: linear-gradient(135deg, #e8f4f8, #d4e6f1);
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            animation: slideIn 0.5s ease;
+        }
+
+        .help-message strong {
+            color: #2980b9;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Memory game */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .memory-card {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .memory-card::before {
+            content: '💕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            transition: opacity 0.3s ease;
+        }
+
+        .memory-card.flipped::before {
+            opacity: 0;
+        }
+
+        .memory-card.flipped {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .memory-card.matched {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        /* Puzzle styles */
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            max-width: 300px;
+            margin: 20px auto;
+        }
+
+        .puzzle-piece {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .puzzle-piece.empty {
+            background: transparent;
+            border: 2px dashed #ccc;
+        }
+
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+            border-color: #ff4757;
+        }
+
+        /* Final stage */
+        .final-stage {
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .celebration {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .prize-text {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .game-title {
+                font-size: 2em;
+            }
+            
+            .memory-grid {
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-container">
+            <h1 class="game-title">💕 Love Quest 💕</h1>
+            
+            <div class="prize-banner">
+                🎁 HADIAH: Rp 300.000 🎁
+            </div>
+
+            <div class="help-system">
+                <div class="help-counter">
+                    ❤️ Bantuan Tersisa: <span id="helpCount">3</span>
+                </div>
+                <button class="btn btn-help" id="helpBtn" onclick="useHelp()">💡 Minta Bantuan</button>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-text" id="progressText">0/5 Selesai</div>
+                </div>
+            </div>
+
+            <!-- Stage 1: Love Knowledge -->
+            <div class="game-stage active" id="stage1">
+                <div class="stage-title">🌟 Tahap 1: Pengetahuan Cinta</div>
+                <div class="stage-description">Jawab pertanyaan tentang hubungan kita!</div>
+                
+                <div class="question-container">
+                    <div class="question">Kapan kita pertama kali bertemu?</div>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this, false)">6 bulan yang lalu</div>
+                        <div class="option" onclick="selectOption(this, true)">1 tahun yang lalu</div>
+                        <div class="option" onclick="selectOption(this, false)">2 tahun yang lalu</div>
+                        <div class="option" onclick="selectOption(this, false)">3 tahun yang lalu</div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" id="nextBtn1" onclick="nextStage(2)" disabled>Lanjut ke Tahap 2</button>
+            </div>
+
+            <!-- Stage 2: Memory Game -->
+            <div class="game-stage" id="stage2">
+                <div class="stage-title">🧠 Tahap 2: Permainan Memori</div>
+                <div class="stage-description">Temukan pasangan emoji yang sama!</div>
+                
+                <div class="memory-grid" id="memoryGrid">
+                    <!-- Cards will be generated by JavaScript -->
+                </div>
+                
+                <div id="memoryResult"></div>
+                <button class="btn btn-primary" id="nextBtn2" onclick="nextStage(3)" disabled>Lanjut ke Tahap 3</button>
+            </div>
+
+            <!-- Stage 3: Love Message -->
+            <div class="game-stage" id="stage3">
+                <div class="stage-title">💌 Tahap 3: Pesan Cinta</div>
+                <div class="stage-description">Lengkapi kalimat romantis ini!</div>
+                
+                <div class="question-container">
+                    <div class="question">"Kamu adalah _____ dalam hidupku"</div>
+                    <div class="input-container">
+                        <input type="text" class="love-input" id="loveMessage" placeholder="Tuliskan jawabanmu...">
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="checkLoveMessage()">Kirim Pesan</button>
+                <button class="btn btn-primary" id="nextBtn3" onclick="nextStage(4)" disabled>Lanjut ke Tahap 4</button>
+            </div>
+
+            <!-- Stage 4: Puzzle -->
+            <div class="game-stage" id="stage4">
+                <div class="stage-title">🧩 Tahap 4: Puzzle Cinta</div>
+                <div class="stage-description">Susun puzzle untuk membentuk kata "LOVE"!</div>
+                
+                <div class="puzzle-container" id="puzzleContainer">
+                    <!-- Puzzle pieces will be generated by JavaScript -->
+                </div>
+                
+                <button class="btn btn-primary" onclick="shufflePuzzle()">Acak Ulang</button>
+                <button class="btn btn-primary" id="nextBtn4" onclick="nextStage(5)" disabled>Lanjut ke Tahap Final</button>
+            </div>
+
+            <!-- Stage 5: Final Challenge -->
+            <div class="game-stage" id="stage5">
+                <div class="stage-title">💎 Tahap Final: Tantangan Terakhir</div>
+                <div class="stage-description">Jawab pertanyaan terakhir untuk memenangkan hadiah!</div>
+                
+                <div class="question-container">
+                    <div class="question">Apa yang paling kamu sukai tentang hubungan kita?</div>
+                    <div class="input-container">
+                        <textarea class="love-input" id="finalAnswer" placeholder="Ceritakan dengan kata-katamu sendiri..." rows="4"></textarea>
+                    </div>
+                </div>
+                
+                <button class="btn btn-success" onclick="completeGame()">Selesaikan Permainan</button>
+            </div>
+
+            <!-- Victory Screen -->
+            <div class="game-stage" id="victory">
+                <div class="final-stage">
+                    <div class="celebration">🎉✨🎊</div>
+                    <h2>Selamat! Kamu Menang!</h2>
+                    <div class="prize-text">Hadiah: Rp 300.000</div>
+                    <p>Kamu telah menyelesaikan semua tantangan dengan sempurna!</p>
+                    <p>Hadiah akan segera diberikan dengan penuh cinta 💕</p>
+                    <button class="btn btn-success" onclick="restartGame()">Main Lagi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStage = 1;
+        let completedStages = 0;
+        let memoryCards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let puzzleOrder = ['L', 'O', 'V', 'E', '', '💕', '❤️', '💖', '🌹'];
+        let currentPuzzleOrder = [...puzzleOrder];
+        let helpCount = 3;
+        let helpUsed = { stage1: false, stage2: false, stage3: false, stage4: false, stage5: false };
+
+        // Create floating hearts
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDelay = Math.random() * 3 + 's';
+            heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 7000);
+        }
+
+        setInterval(createHeart, 800);
+
+        // Update progress bar
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const percentage = (completedStages / 5) * 100;
+            
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = `${completedStages}/5 Selesai`;
+        }
+
+        // Help system
+        function useHelp() {
+            if (helpCount <= 0) {
+                alert('Bantuan sudah habis! Kamu pasti bisa! 💪');
+                return;
+            }
+
+            const helpMessages = {
+                1: {
+                    title: "💡 Bantuan Tahap 1",
+                    message: "Ingat-ingat kembali momen spesial kita! Coba pikirkan kapan kita pertama kali bertemu. Kalau masih bingung, jawaban yang benar adalah pilihan kedua! 😊"
+                },
+                2: {
+                    title: "💡 Bantuan Tahap 2", 
+                    message: "Tips Memory Game: Mulai dari sudut-sudut terlebih dahulu, lalu ingat posisi emoji yang sama. Fokus pada 2-3 kartu saja dulu, jangan buru-buru! 🧠"
+                },
+                3: {
+                    title: "💡 Bantuan Tahap 3",
+                    message: "Untuk melengkapi 'Kamu adalah _____ dalam hidupku', pikirkan hal paling berharga atau penting bagimu. Contoh: 'segalanya', 'cahaya', 'kebahagiaan', 'cinta sejati' 💕"
+                },
+                4: {
+                    title: "💡 Bantuan Tahap 4",
+                    message: "Puzzle Tips: Susun kata LOVE di baris atas (L-O-V-E). Gerakkan kotak yang bersebelahan dengan kotak kosong. Mulai dari huruf L dulu, lalu O, V, dan E! 🧩"
+                },
+                5: {
+                    title: "💡 Bantuan Tahap 5",
+                    message: "Ceritakan dari hati! Tuliskan hal-hal yang membuat kamu bahagia dalam hubungan ini. Misalnya: kebersamaan, dukungan, cinta, atau momen-momen indah kita. Tidak perlu panjang, yang penting tulus! 💖"
+                }
+            };
+
+            const currentHelp = helpMessages[currentStage];
+            
+            // Show help message
+            showHelpMessage(currentHelp.title, currentHelp.message);
+            
+            // Decrease help count
+            helpCount--;
+            document.getElementById('helpCount').textContent = helpCount;
+            
+            // Disable help button if no more help
+            if (helpCount <= 0) {
+                document.getElementById('helpBtn').disabled = true;
+                document.getElementById('helpBtn').textContent = '💡 Bantuan Habis';
+            }
+        }
+
+        function showHelpMessage(title, message) {
+            // Remove existing help message
+            const existingHelp = document.querySelector('.help-message');
+            if (existingHelp) {
+                existingHelp.remove();
+            }
+            
+            // Create new help message
+            const helpDiv = document.createElement('div');
+            helpDiv.className = 'help-message';
+            helpDiv.innerHTML = `<strong>${title}</strong><br>${message}`;
+            
+            // Insert after help system
+            const helpSystem = document.querySelector('.help-system');
+            helpSystem.insertAdjacentElement('afterend', helpDiv);
+            
+            // Auto remove after 10 seconds
+            setTimeout(() => {
+                if (helpDiv) {
+                    helpDiv.remove();
+                }
+            }, 10000);
+        }
+
+        // Stage navigation
+        function nextStage(stageNum) {
+            document.getElementById(`stage${currentStage}`).classList.remove('active');
+            document.getElementById(`stage${stageNum}`).classList.add('active');
+            currentStage = stageNum;
+            completedStages++;
+            updateProgress();
+            
+            if (stageNum === 2) {
+                initMemoryGame();
+            } else if (stageNum === 4) {
+                initPuzzle();
+            }
+        }
+
+        // Stage 1: Question handling
+        function selectOption(element, isCorrect) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+                if (opt === element) {
+                    opt.classList.add(isCorrect ? 'correct' : 'wrong');
+                }
+            });
+            
+            if (isCorrect) {
+                document.getElementById('nextBtn1').disabled = false;
+                setTimeout(() => {
+                    alert('Benar! Kamu ingat dengan baik 💕');
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    alert('Hmm, coba ingat-ingat lagi ya sayang 😊');
+                    // Reset for retry
+                    setTimeout(() => {
+                        options.forEach(opt => {
+                            opt.style.pointerEvents = 'auto';
+                            opt.classList.remove('correct', 'wrong');
+                        });
+                    }, 2000);
+                }, 500);
+            }
+        }
+
+        // Stage 2: Memory Game
+        function initMemoryGame() {
+            const emojis = ['💕', '❤️', '💖', '🌹', '💝', '💍', '🎁', '⭐'];
+            const gameEmojis = [...emojis, ...emojis];
+            gameEmojis.sort(() => Math.random() - 0.5);
+            
+            const memoryGrid = document.getElementById('memoryGrid');
+            memoryGrid.innerHTML = '';
+            memoryCards = [];
+            
+            gameEmojis.forEach((emoji, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.emoji = emoji;
+                card.dataset.index = index;
+                card.addEventListener('click', flipCard);
+                memoryGrid.appendChild(card);
+                memoryCards.push(card);
+            });
+        }
+
+        function flipCard() {
+            if (flippedCards.length >= 2 || this.classList.contains('flipped') || this.classList.contains('matched')) {
+                return;
+            }
+            
+            this.classList.add('flipped');
+            this.textContent = this.dataset.emoji;
+            flippedCards.push(this);
+            
+            if (flippedCards.length === 2) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedPairs++;
+                
+                if (matchedPairs === 8) {
+                    setTimeout(() => {
+                        document.getElementById('memoryResult').innerHTML = '<p style="color: #27ae60; font-weight: bold;">Hebat! Semua pasangan berhasil ditemukan! 🎉</p>';
+                        document.getElementById('nextBtn2').disabled = false;
+                    }, 500);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.textContent = '';
+                    card2.textContent = '';
+                }, 1000);
+            }
+            
+            flippedCards = [];
+        }
+
+        // Stage 3: Love Message
+        function checkLoveMessage() {
+            const message = document.getElementById('loveMessage').value.trim();
+            if (message.length > 0) {
+                alert(`Jawaban yang indah: "${message}" 💕`);
+                document.getElementById('nextBtn3').disabled = false;
+            } else {
+                alert('Tolong isi pesanmu dulu ya sayang! 😊');
+            }
+        }
+
+        // Stage 4: Puzzle
+        function initPuzzle() {
+            shufflePuzzle();
+        }
+
+        function shufflePuzzle() {
+            currentPuzzleOrder = [...puzzleOrder];
+            currentPuzzleOrder.sort(() => Math.random() - 0.5);
+            renderPuzzle();
+        }
+
+        function renderPuzzle() {
+            const puzzleContainer = document.getElementById('puzzleContainer');
+            puzzleContainer.innerHTML = '';
+            
+            currentPuzzleOrder.forEach((piece, index) => {
+                const puzzlePiece = document.createElement('div');
+                puzzlePiece.className = 'puzzle-piece';
+                puzzlePiece.textContent = piece;
+                puzzlePiece.dataset.index = index;
+                puzzlePiece.addEventListener('click', movePuzzlePiece);
+                
+                if (piece === '') {
+                    puzzlePiece.classList.add('empty');
+                }
+                
+                puzzleContainer.appendChild(puzzlePiece);
+            });
+        }
+
+        function movePuzzlePiece() {
+            const clickedIndex = parseInt(this.dataset.index);
+            const emptyIndex = currentPuzzleOrder.indexOf('');
+            
+            // Check if the clicked piece is adjacent to empty space
+            const validMoves = [
+                emptyIndex - 1, emptyIndex + 1, // horizontal
+                emptyIndex - 3, emptyIndex + 3  // vertical
+            ];
+            
+            if (validMoves.includes(clickedIndex)) {
+                // Swap pieces
+                [currentPuzzleOrder[clickedIndex], currentPuzzleOrder[emptyIndex]] = 
+                [currentPuzzleOrder[emptyIndex], currentPuzzleOrder[clickedIndex]];
+                
+                renderPuzzle();
+                checkPuzzleComplete();
+            }
+        }
+
+        function checkPuzzleComplete() {
+            const target = ['L', 'O', 'V', 'E', '', '💕', '❤️', '💖', '🌹'];
+            const isComplete = currentPuzzleOrder.every((piece, index) => piece === target[index]);
+            
+            if (isComplete) {
+                setTimeout(() => {
+                    alert('Puzzle selesai! LOVE tersusun dengan sempurna! 💕');
+                    document.getElementById('nextBtn4').disabled = false;
+                }, 500);
+            }
+        }
+
+        // Stage 5: Final Challenge
+        function completeGame() {
+            const finalAnswer = document.getElementById('finalAnswer').value.trim();
+            if (finalAnswer.length > 0) {
+                document.getElementById('stage5').classList.remove('active');
+                document.getElementById('victory').classList.add('active');
+                createFireworks();
+            } else {
+                alert('Tolong ceritakan perasaanmu dulu ya sayang! 💕');
+            }
+        }
+
+        // Create fireworks
+        function createFireworks() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.style.position = 'absolute';
+                    firework.style.width = '4px';
+                    firework.style.height = '4px';
+                    firework.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                    firework.style.borderRadius = '50%';
+                    firework.style.left = Math.random() * 100 + '%';
+                    firework.style.top = Math.random() * 100 + '%';
+                    firework.style.animation = 'explode 1.5s ease-out';
+                    firework.style.pointerEvents = 'none';
+                    document.body.appendChild(firework);
+
+                    setTimeout(() => {
+                        firework.remove();
+                    }, 1500);
+                }, i * 50);
+            }
+        }
+
+        // Restart game
+        function restartGame() {
+            currentStage = 1;
+            completedStages = 0;
+            matchedPairs = 0;
+            flippedCards = [];
+            helpCount = 3;
+            helpUsed = { stage1: false, stage2: false, stage3: false, stage4: false, stage5: false };
+            
+            // Reset help system
+            document.getElementById('helpCount').textContent = helpCount;
+            document.getElementById('helpBtn').disabled = false;
+            document.getElementById('helpBtn').textContent = '💡 Minta Bantuan';
+            
+            // Remove any help messages
+            const existingHelp = document.querySelector('.help-message');
+            if (existingHelp) {
+                existingHelp.remove();
+            }
+            
+            // Reset all stages
+            document.querySelectorAll('.game-stage').forEach(stage => {
+                stage.classList.remove('active');
+            });
+            document.getElementById('stage1').classList.add('active');
+            
+            // Reset buttons
+            document.querySelectorAll('[id^="nextBtn"]').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            // Reset inputs
+            document.getElementById('loveMessage').value = '';
+            document.getElementById('finalAnswer').value = '';
+            
+            // Reset options
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('correct', 'wrong');
+                opt.style.pointerEvents = 'auto';
+            });
+            
+            updateProgress();
+        }
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>
